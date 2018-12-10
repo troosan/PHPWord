@@ -31,6 +31,17 @@ class Converter
     const DEGREE_TO_ANGLE = 60000;
 
     /**
+     * Convert twip to centimeter
+     *
+     * @param float $twip
+     * @return float
+     */
+    public static function twipToCm($twip)
+    {
+        return $twip * self::INCH_TO_CM / self::INCH_TO_TWIP;
+    }
+
+    /**
      * Convert centimeter to twip
      *
      * @param float $centimeter
@@ -299,6 +310,7 @@ class Converter
         if ($value == '0') {
             return 0;
         }
+        $matches = array();
         if (preg_match('/^[+-]?([0-9]+\.?[0-9]*)?(px|em|ex|%|in|cm|mm|pt|pc)$/i', $value, $matches)) {
             $size = $matches[1];
             $unit = $matches[2];

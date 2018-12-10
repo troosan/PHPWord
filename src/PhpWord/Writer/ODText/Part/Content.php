@@ -82,33 +82,35 @@ class Content extends AbstractPart
         foreach ($sections as $section) {
             $this->collectTrackedChanges($section, $trackedChanges);
         }
-        $xmlWriter->startElement('text:tracked-changes');
-        foreach ($trackedChanges as $trackedElement) {
-            $trackedChange = $trackedElement->getTrackChange();
-            $xmlWriter->startElement('text:changed-region');
-            $trackedChange->setElementId();
-            $xmlWriter->writeAttribute('text:id', $trackedChange->getElementId());
+        if (count($trackedChanges) > 0) {
+            $xmlWriter->startElement('text:tracked-changes');
+            foreach ($trackedChanges as $trackedElement) {
+                $trackedChange = $trackedElement->getTrackChange();
+                $xmlWriter->startElement('text:changed-region');
+                $trackedChange->setElementId();
+                $xmlWriter->writeAttribute('text:id', $trackedChange->getElementId());
 
-            if (($trackedChange->getChangeType() == TrackChange::INSERTED)) {
-                $xmlWriter->startElement('text:insertion');
-            } elseif ($trackedChange->getChangeType() == TrackChange::DELETED) {
-                $xmlWriter->startElement('text:deletion');
-            }
+                if (($trackedChange->getChangeType() == TrackChange::INSERTED)) {
+                    $xmlWriter->startElement('text:insertion');
+                } elseif ($trackedChange->getChangeType() == TrackChange::DELETED) {
+                    $xmlWriter->startElement('text:deletion');
+                }
 
-            $xmlWriter->startElement('office:change-info');
-            $xmlWriter->writeElement('dc:creator', $trackedChange->getAuthor());
-            if ($trackedChange->getDate() != null) {
-                $xmlWriter->writeElement('dc:date', $trackedChange->getDate()->format('Y-m-d\TH:i:s\Z'));
-            }
-            $xmlWriter->endElement(); // office:change-info
-            if ($trackedChange->getChangeType() == TrackChange::DELETED) {
-                $xmlWriter->writeElement('text:p', $trackedElement->getText());
-            }
+                $xmlWriter->startElement('office:change-info');
+                $xmlWriter->writeElement('dc:creator', $trackedChange->getAuthor());
+                if ($trackedChange->getDate() != null) {
+                    $xmlWriter->writeElement('dc:date', $trackedChange->getDate()->format('Y-m-d\TH:i:s\Z'));
+                }
+                $xmlWriter->endElement(); // office:change-info
+                if ($trackedChange->getChangeType() == TrackChange::DELETED) {
+                    $xmlWriter->writeElement('text:p', $trackedElement->getText());
+                }
 
-            $xmlWriter->endElement(); // text:insertion|text:deletion
-            $xmlWriter->endElement(); // text:changed-region
+                $xmlWriter->endElement(); // text:insertion|text:deletion
+                $xmlWriter->endElement(); // text:changed-region
+            }
+            $xmlWriter->endElement(); // text:tracked-changes
         }
-        $xmlWriter->endElement(); // text:tracked-changes
 
         // Sequence declarations
         $sequences = array('Illustration', 'Table', 'Text', 'Drawing');

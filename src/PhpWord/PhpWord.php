@@ -243,7 +243,7 @@ class PhpWord
     /**
      * Create new section
      *
-     * @param array $style
+     * @param null|array|\PhpOffice\PhpWord\Style $style
      * @return \PhpOffice\PhpWord\Element\Section
      */
     public function addSection($style = null)

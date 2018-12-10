@@ -17,6 +17,9 @@
 
 namespace PhpOffice\PhpWord\Writer\ODText\Style;
 
+use PhpOffice\PhpWord\Shared\Converter;
+use PhpOffice\PhpWord\SimpleType\Jc;
+
 /**
  * Font style writer
  *
@@ -35,9 +38,6 @@ class Paragraph extends AbstractStyle
         }
         $xmlWriter = $this->getXmlWriter();
 
-        $marginTop = (is_null($style->getSpaceBefore()) || $style->getSpaceBefore() == 0) ? '0' : round(17.6 / $style->getSpaceBefore(), 2);
-        $marginBottom = (is_null($style->getSpaceAfter()) || $style->getSpaceAfter() == 0) ? '0' : round(17.6 / $style->getSpaceAfter(), 2);
-
         $xmlWriter->startElement('style:style');
         $xmlWriter->writeAttribute('style:name', $style->getStyleName());
         $xmlWriter->writeAttribute('style:family', 'paragraph');
@@ -50,12 +50,62 @@ class Paragraph extends AbstractStyle
         if ($style->isAuto()) {
             $xmlWriter->writeAttribute('style:page-number', 'auto');
         } else {
-            $xmlWriter->writeAttribute('fo:margin-top', $marginTop . 'cm');
-            $xmlWriter->writeAttribute('fo:margin-bottom', $marginBottom . 'cm');
-            $xmlWriter->writeAttribute('fo:text-align', $style->getAlignment());
+            // Spacing
+            $marginTop = $style->getSpaceBefore();
+            $xmlWriter->writeAttributeIf(null != $marginTop, 'fo:margin-top', Converter::twipToCm($marginTop) . 'cm');
+            $marginBottom = $style->getSpaceAfter();
+            $xmlWriter->writeAttributeIf(null != $marginBottom, 'fo:margin-bottom', Converter::twipToCm($marginBottom) . 'cm');
+
+            // Alignment
+            $xmlWriter->writeAttributeIf('' !== $style->getAlignment(), 'fo:text-align', $this->getAlignment($style->getAlignment()));
+
+            // Page break
+            $xmlWriter->writeAttributeIf($style->hasPageBreakBefore(), 'fo:break-before', 'page');
+
+            // Indentation
+            if ($style->getIndentation() != null) {
+                $marginLeft = $style->getIndentation()->getLeft();
+                $xmlWriter->writeAttributeIf(null != $marginLeft, 'fo:margin-left', Converter::twipToCm($marginLeft) . 'cm');
+
+                $marginRight = $style->getIndentation()->getRight();
+                $xmlWriter->writeAttributeIf(null != $marginRight, 'fo:margin-right', Converter::twipToCm($marginRight) . 'cm');
+
+                $firstLine = $style->getIndentation()->getFirstLine();
+                $xmlWriter->writeAttributeIf(null != $firstLine, 'fo:text-indent', Converter::twipToCm($firstLine) . 'cm');
+            }
         }
+
         $xmlWriter->endElement(); //style:paragraph-properties
 
         $xmlWriter->endElement(); //style:style
+    }
+
+    private function getAlignment($alignment)
+    {
+        $textAlign = '';
+
+        switch ($alignment) {
+            case Jc::CENTER:
+                $textAlign = 'center';
+                break;
+            case Jc::END:
+            case Jc::MEDIUM_KASHIDA:
+            case Jc::HIGH_KASHIDA:
+            case Jc::LOW_KASHIDA:
+            case Jc::RIGHT:
+                $textAlign = 'right';
+                break;
+            case Jc::BOTH:
+            case Jc::DISTRIBUTE:
+            case Jc::THAI_DISTRIBUTE:
+            case Jc::JUSTIFY:
+                $textAlign = 'justify';
+                break;
+            default: // all others, align left
+                $textAlign = 'left';
+                break;
+        }
+
+        return $textAlign;
     }
 }

@@ -343,7 +343,7 @@ class Paragraph extends Border
     }
 
     /**
-     * Get shading
+     * Get indentation
      *
      * @return \PhpOffice\PhpWord\Style\Indentation
      */

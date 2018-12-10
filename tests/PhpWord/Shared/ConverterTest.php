@@ -29,6 +29,7 @@ class ConverterTest extends \PHPUnit\Framework\TestCase
      */
     public function testUnitConversions()
     {
+        $values = array();
         $values[] = 0; // zero value
         $values[] = rand(1, 100) / 100; // fraction number
         $values[] = rand(1, 100); // integer
@@ -96,6 +97,9 @@ class ConverterTest extends \PHPUnit\Framework\TestCase
 
             $result = Converter::angleToDegree($value);
             $this->assertEquals(round($value / 60000), $result);
+
+            $result = Converter::twipToCm($value);
+            $this->assertEquals($value * 0.00176388889, $result, '', 0.0001);
         }
     }
 
@@ -105,6 +109,7 @@ class ConverterTest extends \PHPUnit\Framework\TestCase
     public function testHtmlToRGB()
     {
         // Prepare test values [ original, expected ]
+        $values = array();
         $values[] = array('#FF99DD', array(255, 153, 221)); // With #
         $values[] = array('FF99DD', array(255, 153, 221)); // 6 characters
         $values[] = array('F9D', array(255, 153, 221)); // 3 characters
